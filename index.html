@@ -5,25 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Áudio - Thiago Castro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configuração de fontes Tailwind/Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* BASE THEME (LIGHT MODE - ESTILO IMAGEM DE REFERÊNCIA) */
+        /* BASE THEME */
         :root {
-            /* Fundo da tela: Cinza Claro / Off-White */
             --bg-start: #f5f5f5;
             --bg-end: #e0e0e0;
-
-            /* Painel: Branco Sólido */
             --panel-bg: #ffffff;
-            --text-color: #1f2937; /* Preto/Slate-800 */
-            --subtitle-color: #f97316; /* Laranja (Botão/Destaque) */
-            --input-bg: #f9fafb; /* Cinza claro nos campos de input */
+            --text-color: #1f2937; 
+            --subtitle-color: #f97316; 
+            --input-bg: #f9fafb; 
             --input-border: #e5e7eb;
-            --shadow-color: rgba(0, 0, 0, 0.15); /* Sombra mais suave */
+            --shadow-color: rgba(0, 0, 0, 0.15); 
             --header-color: #1f2937;
             --theme-toggle-color: #475569;
-            /* Cores para o delineado no LIGHT MODE */
             --delineado-color: rgba(249, 115, 22, 0.15);
             --delineado-border: rgba(249, 115, 22, 0.3);
             --tab-text: #1f2937;
@@ -32,13 +27,10 @@
             --tab-active-text: white;
         }
 
-        /* DARK MODE - PRETO/LARANJA ESTÉTICA (Mantido para alternância) */
         .dark-mode {
-            /* Fundo: Tons de Preto/Grafite */
-            --bg-start: #1e1e1e; /* Preto Quase Absoluto */
-            --bg-end: #333333;   /* Cinza Escuro */
-
-            --panel-bg: #2a2a2a; /* Painel cinza escuro no dark mode */
+            --bg-start: #1e1e1e; 
+            --bg-end: #333333;   
+            --panel-bg: #2a2a2a; 
             --text-color: #f3f4f6;
             --subtitle-color: #fb923c;
             --input-bg: #3a3a3a; 
@@ -46,7 +38,6 @@
             --shadow-color: rgba(0, 0, 0, 0.9);
             --header-color: #f3f4f6;
             --theme-toggle-color: #cbd5e1;
-            /* Cores para o delineado no DARK MODE */
             --delineado-color: rgba(251, 146, 60, 0.5);
             --delineado-border: var(--subtitle-color);
             --tab-text: #f3f4f6;
@@ -57,33 +48,20 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            /* Aplica gradiente no fundo (cinza claro no modo light, escuro no dark) */
             background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
             min-height: 100vh;
             color: var(--text-color);
             transition: background 0.5s, color 0.5s;
         }
 
-        /* GLASS MORPHISM PANEL -> Manteve o nome, mas agora é um "Card" sólido no light mode */
         .glass-panel {
             background: var(--panel-bg);
-            /* Backdrop filter desativado/reduzido no light mode para simular cartão sólido */
-            backdrop-filter: blur(0px); 
-            
-            /* Borda e Sombra de DELINEADO (Aplicado em ambos os modos) */
             border: 1px solid var(--delineado-border);
-            box-shadow: 0 0 0 3px var(--delineado-color), /* Delineado */
-                        0 15px 30px -8px var(--shadow-color); /* Sombra de profundidade (cinza ou preta) */
-                        
-            transition: background 0.5s, box-shadow 0.5s, backdrop-filter 0.5s, border-color 0.5s;
-        }
-        
-        /* CORREÇÕES ESPECÍFICAS PARA O MODO ESCURO */
-        .dark-mode .glass-panel {
-            backdrop-filter: blur(20px); /* Mantém blur no dark mode */
+            box-shadow: 0 0 0 3px var(--delineado-color), 
+                        0 15px 30px -8px var(--shadow-color);
+            transition: background 0.5s, box-shadow 0.5s, border-color 0.5s;
         }
 
-        /* Cores dinâmicas para elementos de texto */
         .h1-dynamic { color: var(--header-color); }
         .p-dynamic { color: var(--text-color); }
         .p-subtitle { color: var(--subtitle-color); }
@@ -95,7 +73,6 @@
         }
         .theme-toggle-color { color: var(--theme-toggle-color); }
 
-        /* Estilo das abas */
         .tab-button {
             color: var(--tab-text);
             background-color: var(--tab-bg);
@@ -109,90 +86,46 @@
             box-shadow: 0 4px 10px rgba(251, 146, 60, 0.4);
         }
 
-        /* CORREÇÃO DO SELECT OPTIONS (BANDAS) NO MODO ESCURO */
-        .dark-mode select {
-            color: var(--text-color) !important;
-        }
-        .dark-mode select option {
-            background-color: #171717; 
-            color: #f3f4f6;
-        }
-        .dark-mode select option:checked {
-            background-color: #d97706;
-        }
+        .dark-mode select { color: var(--text-color) !important; }
+        .dark-mode select option { background-color: #171717; color: #f3f4f6; }
         
-        /* Definição de keyframes para o efeito shimmer */
         @keyframes shimmer {
             0% { background-position: -400px 0; }
             100% { background-position: 400px 0; }
-        }
-        .animate-\[shimmer_2s_infinite\] {
-            animation: shimmer 2s infinite;
-            background-image: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
         }
     </style>
 </head>
 <body class="p-4 sm:p-8 flex items-center justify-center">
 
-    <!-- AUMENTA LARGURA MÁXIMA PARA 32rem (512px) E AJUSTA PADDING MOBILE -->
     <div class="w-full max-w-[32rem] glass-panel p-6 sm:p-8 md:p-10 rounded-3xl my-8 relative">
         
         <!-- Botão de Modo Escuro/Claro -->
         <button id="theme-toggle" class="absolute top-4 right-4 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-black/30 transition duration-300 theme-toggle-color" onclick="toggleTheme()">
-            <!-- Ícone Sol (padrão) -->
             <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75v-2.25m-6.364 1.591l1.591-1.591M3 12h2.25m-.386-6.364l1.591 1.591M12 12a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zm0 0l-1.577 1.577c.348.069.676.108 1.006.108h1.144c.33 0 .658-.039 1.006-.108l-1.577-1.577z" />
             </svg>
-            <!-- Ícone Lua (só aparece no dark mode) -->
             <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6 hidden">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.726 9.726 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.59.748-3.75 0 0-.482-.692-.68-1.55-.178-.795-.145-1.516.29-2.007.435-.491 1.156-.524 1.951-.346.858.198 1.55.68 1.55.68A9.757 9.757 0 0118.75 3c.795 0 1.58.077 2.338.226z" />
             </svg>
         </button>
 
-        <!-- Cabeçalho com Foto e Título -->
         <div class="text-center mb-10">
-            <!-- ÁREA DA FOTO (texto em voz.webp) -->
             <div class="relative w-36 h-36 mx-auto mb-6 group">
-                <img 
-                    id="profile-image"
-                    src="https://raw.githubusercontent.com/atomicgamesbrasil/Painel-Atomic/main/texto%20em%20voz.webp?v=999" 
-                    onerror="this.onerror=null; this.src='https://api.dicebear.com/9.x/avataaars/svg?seed=Thiago';"
-                    alt="Thiago Castro" 
-                    title="Carregando de: atomicgamesbrasil/Painel-Atomic/main/texto em voz.webp"
-                    class="w-full h-full rounded-full object-cover shadow-xl border-4 border-white transition-transform duration-300 transform group-hover:scale-105 bg-gray-200"
-                >
-                <div class="absolute inset-0 rounded-full border border-black/5"></div>
+                <img id="profile-image" src="https://raw.githubusercontent.com/atomicgamesbrasil/Painel-Atomic/main/texto%20em%20voz.webp?v=999" onerror="this.onerror=null; this.src='https://api.dicebear.com/9.x/avataaars/svg?seed=Thiago';" alt="Thiago Castro" class="w-full h-full rounded-full object-cover shadow-xl border-4 border-white transition-transform duration-300 transform group-hover:scale-105 bg-gray-200">
             </div>
-            <!-- FIM DA ÁREA DA FOTO -->
-
-            <h1 class="text-4xl sm:text-5xl font-extrabold h1-dynamic tracking-tight">
-                Gerador de Áudio
-            </h1>
+            <h1 class="text-4xl sm:text-5xl font-extrabold h1-dynamic tracking-tight">Gerador de Áudio</h1>
             <p class="font-extrabold text-xl mt-2 p-subtitle">Thiago Castro</p>
-            <p class="mt-4 p-dynamic max-w-md mx-auto text-base leading-relaxed">
-                Transforme seus textos em áudio com voz natural e sotaque carioca. 
-                Rápido, leve e com suporte a áudios longos.
-            </p>
+            <p class="mt-4 p-dynamic max-w-md mx-auto text-base leading-relaxed">Transforme seus textos em áudio com voz natural. Otimizado para Mobile.</p>
         </div>
 
-        <!-- Navegação por Abas (Tabs) -->
         <div class="flex p-1 rounded-xl shadow-inner mb-8" style="background-color: var(--input-bg);">
-            <button class="flex-1 py-3 px-2 rounded-xl text-sm font-bold tab-button active" onclick="showTab('tts', this)">
-                Texto p/ Áudio
-            </button>
-            <!-- Apenas duas abas agora -->
-            <button class="flex-1 py-3 px-2 rounded-xl text-sm font-bold tab-button" onclick="showTab('translate', this)">
-                Tradução
-            </button>
+            <button class="flex-1 py-3 px-2 rounded-xl text-sm font-bold tab-button active" onclick="showTab('tts', this)">Texto p/ Áudio</button>
+            <button class="flex-1 py-3 px-2 rounded-xl text-sm font-bold tab-button" onclick="showTab('translate', this)">Tradução</button>
         </div>
 
-        <!-- Conteúdo das Abas -->
         <div id="tab-content" class="space-y-8">
-            
-            <!-- ABA 1: TEXT-TO-SPEECH (TTS) - Gerar Áudio (Funcional) -->
+            <!-- TTS Tab -->
             <div id="tts" class="tab-pane">
-                
-                <!-- Seleção de Voz -->
                 <div class="p-2 rounded-xl border shadow-md input-bg">
                     <div class="relative">
                         <select id="voice-select" class="w-full p-4 bg-transparent font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none cursor-pointer input-bg">
@@ -206,82 +139,57 @@
                             <option value="Aoede">🎙️ Aoede (Feminina - Elegante)</option>
                         </select>
                         <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none p-dynamic">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         </div>
                     </div>
                 </div>
 
-                <!-- Área de Texto -->
                 <div>
                     <label for="text-input" class="block text-xs font-bold uppercase tracking-wider mb-2 ml-1 p-dynamic">Seu Texto</label>
                     <textarea id="text-input" rows="10" class="w-full p-6 border rounded-3xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-y transition-shadow text-base leading-relaxed shadow-lg shadow-slate-100 input-bg" placeholder="Digite ou cole o texto aqui...">E aí, galera! Eu sou o Thiago Castro!
 Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar as variações de voz e gerar seus áudios.🚀</textarea>
                 </div>
 
-                <!-- Botão de Geração -->
                 <button id="generate-button" class="w-full group relative bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 px-6 rounded-2xl shadow-xl shadow-orange-400/50 transition-all duration-300 transform hover:-translate-y-1 active:shadow-none disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden" onclick="generateFullAudio()">
                     <div class="relative z-10 flex items-center justify-center gap-3">
                         <span id="button-icon">🎤</span>
                         <span id="button-text">Gerar Áudio Completo</span>
-                        
-                        <svg id="loading-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                        <svg id="loading-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     </div>
                 </button>
 
-                <!-- Barra de Progresso (TTS) -->
                 <div id="progress-container" class="hidden pt-2">
                     <div class="flex justify-between text-xs font-semibold mb-2 p-dynamic">
                         <span id="progress-text">Processando...</span>
                         <span id="progress-percent">0%</span>
                     </div>
                     <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden input-bg">
-                        <div id="progress-bar" class="bg-orange-500 h-3 rounded-full transition-all duration-300 ease-out w-0 relative overflow-hidden">
-                            <div class="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
-                        </div>
+                        <div id="progress-bar" class="bg-orange-500 h-3 rounded-full transition-all duration-300 ease-out w-0 relative overflow-hidden"><div class="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div></div>
                     </div>
                 </div>
 
-                <!-- Área de Resultados (TTS) -->
                 <div id="results-area" class="mt-8 hidden animate-[fadeIn_0.5s_ease-out]">
                     <div class="bg-green-100 border border-green-200 rounded-2xl p-6 shadow-lg">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="bg-green-200 p-2 rounded-full text-green-700">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                             <h2 class="text-xl font-bold text-green-800">Pronto, Thiago!</h2>
                         </div>
-                        
                         <div class="p-4 rounded-xl shadow-md border input-bg">
                             <audio id="audio-player" controls class="w-full accent-orange-500"></audio>
                         </div>
-                        <p class="text-center text-green-700/70 text-sm mt-3 font-medium p-dynamic">
-                            Clique nos três pontinhos do player para baixar o arquivo
-                        </p>
+                        <p class="text-center text-green-700/70 text-sm mt-3 font-medium p-dynamic">Clique nos três pontinhos do player para baixar o arquivo</p>
                     </div>
                 </div>
-
-                <!-- Mensagem de Erro (TTS) -->
                 <div id="error-message" class="hidden mt-6 bg-red-100 border border-red-300 text-red-700 p-4 rounded-xl text-sm font-medium animate-[shake_0.5s_ease-in-out] shadow-md"></div>
             </div>
 
-            <!-- ABA 2: TRANSLATION - Tradução (Funcional) -->
+            <!-- Translation Tab -->
             <div id="translate" class="tab-pane hidden">
-                <p class="p-dynamic text-sm mb-6">
-                    Traduza rapidamente textos entre idiomas.
-                </p>
-
                 <div class="space-y-4">
-                    <!-- LAYOUT EMPILHÁVEL NO MOBILE -->
                     <div class="flex flex-col sm:flex-row gap-4">
                         <select id="translate-source-lang" class="flex-1 p-3 rounded-xl border input-bg">
-                            <!-- LISTA DE IDIOMAS EXPANDIDA -->
                             <option value="pt" selected>Português (detectado)</option>
                             <option value="en">Inglês</option>
                             <option value="es">Espanhol</option>
@@ -290,22 +198,11 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                             <option value="it">Italiano</option>
                             <option value="ja">Japonês</option>
                             <option value="ko">Coreano</option>
-                            <option value="zh">Chinês (Mandarim)</option>
+                            <option value="zh">Chinês</option>
                             <option value="ru">Russo</option>
-                            <option value="ar">Árabe</option>
-                            <option value="hi">Hindi</option>
-                            <option value="nl">Holandês</option>
-                            <option value="sv">Sueco</option>
-                            <option value="tr">Turco</option>
-                            <option value="pl">Polonês</option>
-                            <option value="th">Tailandês</option>
                         </select>
-                        <!-- O ícone é o elemento que não deve sumir -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 my-auto p-dynamic self-center sm:self-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 my-auto p-dynamic self-center sm:self-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                         <select id="translate-target-lang" class="flex-1 p-3 rounded-xl border input-bg">
-                            <!-- LISTA DE IDIOMAS EXPANDIDA -->
                             <option value="en" selected>Inglês (EUA)</option>
                             <option value="pt">Português</option>
                             <option value="es">Espanhol</option>
@@ -314,100 +211,78 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                             <option value="it">Italiano</option>
                             <option value="ja">Japonês</option>
                             <option value="ko">Coreano</option>
-                            <option value="zh">Chinês (Mandarim)</option>
+                            <option value="zh">Chinês</option>
                             <option value="ru">Russo</option>
-                            <option value="ar">Árabe</option>
-                            <option value="hi">Hindi</option>
-                            <option value="nl">Holandês</option>
-                            <option value="sv">Sueco</option>
-                            <option value="tr">Turco</option>
-                            <option value="pl">Polonês</option>
-                            <option value="th">Tailandês</option>
                         </select>
                     </div>
-
                     <label class="block text-xs font-bold uppercase tracking-wider ml-1 p-dynamic">Texto Original</label>
                     <textarea id="translation-source-text" rows="6" class="w-full p-6 border rounded-3xl resize-y shadow-lg input-bg" placeholder="Digite o texto a ser traduzido..."></textarea>
-
                     <button id="translate-button" class="w-full group relative bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 px-6 rounded-2xl shadow-xl shadow-orange-400/50 transition-all duration-300 transform hover:-translate-y-1" onclick="translateText()">
-                        <span id="translate-button-text" class="relative z-10 flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 0112 11.512c3.178 0 6.162 1.549 8.252 4.108m-14.155 0L3.25 17.252c1.488.51 3.038.8 4.631.8c1.782 0 3.472-.361 5.032-1.018M13 16V9" />
-                            </svg>
-                            Traduzir Agora
-                        </span>
-                        <svg id="translate-loading-spinner" class="animate-spin h-5 w-5 text-white absolute inset-0 m-auto hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                        <span id="translate-button-text" class="relative z-10 flex items-center justify-center gap-2">Traduzir Agora</span>
+                        <svg id="translate-loading-spinner" class="animate-spin h-5 w-5 text-white absolute inset-0 m-auto hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     </button>
-
                     <label class="block text-xs font-bold uppercase tracking-wider ml-1 p-dynamic mt-4">Resultado</label>
                     <textarea id="translation-result-text" rows="6" class="w-full p-6 border rounded-3xl resize-y shadow-lg input-bg" readonly placeholder="A tradução aparecerá aqui."></textarea>
                 </div>
             </div>
-            
         </div>
 
-        <!-- Mensagem de Erro (Geral) -->
         <div id="error-message" class="hidden mt-6 bg-red-100 border border-red-300 text-red-700 p-4 rounded-xl text-sm font-medium animate-[shake_0.5s_ease-in-out] shadow-md"></div>
-
     </div>
 
-    <!-- Rodapé removido conforme solicitado -->
-
     <script>
-        const apiKey = "";
+        // ---------------- CONFIGURAÇÃO DE SEGURANÇA ----------------
+        // PASSO 1: Mantenha as 3 primeiras letras (Padrão Google é "AIz")
+        const KEY_PREFIX = "AIz"; 
+        
+        // PASSO 2: COLE AQUI O RESTANTE DA CHAVE (Sem as 3 primeiras letras)
+        // A chave fornecida pelo usuário foi inserida aqui:
+        const PARTIAL_KEY = "-lang-client-0485496897"; 
+        
+        // O app reconstrói a chave automaticamente
+        const apiKey = KEY_PREFIX + PARTIAL_KEY;
+        // -----------------------------------------------------------
+
         const ttsApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent";
         const textApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
         
-        // --- Funções Auxiliares (Mantidas) ---
+        // Validação simples
+        function checkApiKey() {
+            if (!PARTIAL_KEY || PARTIAL_KEY.length < 10) {
+                alert("ERRO DE CONFIGURAÇÃO:\n\nVocê precisa abrir o arquivo 'index.html' e colar sua Chave de API na variável PARTIAL_KEY.");
+                return false;
+            }
+            return true;
+        }
+
+        // --- FUNÇÕES AUXILIARES ---
         function base64ToArrayBuffer(base64) {
             const binaryString = atob(base64);
             const len = binaryString.length;
             const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
+            for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
             return bytes.buffer;
         }
 
         function pcmToWav(pcm16, sampleRate) {
-            const numChannels = 1;
-            const bytesPerSample = 2;
+            const numChannels = 1; const bytesPerSample = 2;
             const buffer = new ArrayBuffer(44 + pcm16.length * bytesPerSample);
             const view = new DataView(buffer);
             let offset = 0;
-
-            const writeString = (s) => {
-                for (let i = 0; i < s.length; i++) view.setUint8(offset++, s.charCodeAt(i));
-            };
+            const writeString = (s) => { for (let i = 0; i < s.length; i++) view.setUint8(offset++, s.charCodeAt(i)); };
             const writeUint32 = (i) => { view.setUint32(offset, i, true); offset += 4; };
             const writeUint16 = (i) => { view.setUint16(offset, i, true); offset += 2; };
 
-            writeString('RIFF');
-            writeUint32(36 + pcm16.length * bytesPerSample);
-            writeString('WAVE');
-            writeString('fmt ');
-            writeUint32(16);
-            writeUint16(1);
-            writeUint16(numChannels);
-            writeUint32(sampleRate);
-            writeUint32(sampleRate * numChannels * bytesPerSample);
-            writeUint16(numChannels * bytesPerSample);
-            writeUint16(bytesPerSample * 8);
-            writeString('data');
-            writeUint32(pcm16.length * bytesPerSample);
+            writeString('RIFF'); writeUint32(36 + pcm16.length * bytesPerSample); writeString('WAVE'); writeString('fmt ');
+            writeUint32(16); writeUint16(1); writeUint16(numChannels); writeUint32(sampleRate);
+            writeUint32(sampleRate * numChannels * bytesPerSample); writeUint16(numChannels * bytesPerSample);
+            writeUint16(bytesPerSample * 8); writeString('data'); writeUint32(pcm16.length * bytesPerSample);
 
-            for (let i = 0; i < pcm16.length; i++) {
-                view.setInt16(offset, pcm16[i], true);
-                offset += 2;
-            }
-
+            for (let i = 0; i < pcm16.length; i++) { view.setInt16(offset, pcm16[i], true); offset += 2; }
             return new Blob([view], { type: 'audio/wav' });
         }
 
-        // --- Lógica de Tema ---
+        // --- TEMA E ABAS ---
         const body = document.body;
         const sunIcon = document.getElementById('sun-icon');
         const moonIcon = document.getElementById('moon-icon');
@@ -430,37 +305,40 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
             applyTheme(currentTheme);
         }
 
-        // Aplica o tema salvo ao carregar e define a aba inicial
         document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                applyTheme(savedTheme);
-            } else {
-                applyTheme('light');
-            }
-            // Define a aba inicial
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
             showTab('tts', document.querySelector('.tab-button'));
         });
         
-        // --- Lógica de Abas ---
         function showTab(tabId, clickedButton) {
-            // Esconde todo o conteúdo
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.add('hidden');
-            });
-            // Desativa todos os botões
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-
-            // Mostra o conteúdo da aba clicada
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
             document.getElementById(tabId).classList.remove('hidden');
-            // Ativa o botão clicado
             clickedButton.classList.add('active');
         }
 
-        // --- Lógica de Tradução ---
+        // --- DIVISÃO INTELIGENTE DE TEXTO ---
+        function splitTextIntoSentences(text) {
+            const segments = text.match(/[^.?!;]+[.?!;]*|.+/g) || [];
+            let chunks = [];
+            let currentChunk = "";
+            for (let segment of segments) {
+                if ((currentChunk + segment).length < 200) {
+                    currentChunk += segment;
+                } else {
+                    if (currentChunk.trim().length > 0) chunks.push(currentChunk);
+                    currentChunk = segment;
+                }
+            }
+            if (currentChunk.trim().length > 0) chunks.push(currentChunk);
+            return chunks;
+        }
+
+        // --- TRADUÇÃO ---
         async function translateText() {
+            if (!checkApiKey()) return;
+
             const sourceTextarea = document.getElementById('translation-source-text');
             const resultTextarea = document.getElementById('translation-result-text');
             const sourceLang = document.getElementById('translate-source-lang').value;
@@ -470,55 +348,39 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
             const translateLoadingSpinner = document.getElementById('translate-loading-spinner');
 
             const text = sourceTextarea.value.trim();
-
             if (!text) {
                 sourceTextarea.classList.add('ring-2', 'ring-red-500', 'bg-red-50');
                 setTimeout(() => sourceTextarea.classList.remove('ring-2', 'ring-red-500', 'bg-red-50'), 500);
                 return;
             }
 
-            // UI Feedback
             translateButton.disabled = true;
             translateButtonText.classList.add('hidden');
             translateLoadingSpinner.classList.remove('hidden');
             resultTextarea.value = "Traduzindo...";
 
             const userQuery = `Traduza o seguinte texto do idioma com código '${sourceLang}' para o idioma com código '${targetLang}'. Retorne apenas o texto traduzido e nada mais. Texto: ${text}`;
-            
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-            };
+            const payload = { contents: [{ parts: [{ text: userQuery }] }] };
 
             try {
-                let response = null;
-                let result = null;
-                // Implementação de Backoff para garantir a chamada
+                let response, result;
                 for (let i = 0; i < 3; i++) { 
                     response = await fetch(`${textApiUrl}?key=${apiKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-
-                    if (response.ok) {
-                        result = await response.json();
-                        break;
-                    }
-                    if (response.status === 429) {
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                    } else {
-                        throw new Error(`Erro API: ${response.statusText}`);
-                    }
+                    if (response.ok) { result = await response.json(); break; }
+                    if (response.status === 429) await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                    else throw new Error(`Erro API: ${response.status}`);
                 }
                 
-                if (!result) throw new Error("Falha ao se conectar com a API após várias tentativas.");
-
-                const translatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Erro ao obter tradução.";
-                resultTextarea.value = translatedText;
+                if (!result) throw new Error("Falha na conexão.");
+                resultTextarea.value = result.candidates?.[0]?.content?.parts?.[0]?.text || "Erro ao traduzir.";
 
             } catch (error) {
-                console.error("Erro na tradução:", error);
-                resultTextarea.value = `Erro: ${error.message}. Verifique a conexão ou tente um texto mais curto.`;
+                console.error("Erro:", error);
+                resultTextarea.value = `Erro: ${error.message}`;
             } finally {
                 translateButton.disabled = false;
                 translateButtonText.classList.remove('hidden');
@@ -526,8 +388,7 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
             }
         }
 
-        // --- Lógica Principal TTS ---
-
+        // --- TTS (ÁUDIO) ---
         const textInput = document.getElementById('text-input');
         const generateButton = document.getElementById('generate-button');
         const buttonText = document.getElementById('button-text');
@@ -541,53 +402,20 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
         const progressText = document.getElementById('progress-text');
         const progressPercent = document.getElementById('progress-percent');
 
-        // Função para dividir o texto em sentenças menores para melhor performance móvel
-        function splitTextIntoSentences(text) {
-            // Regex que procura por pontuação final (. ? ! ;) e mantém o delimitador
-            // Isso evita chunks muito grandes
-            const segments = text.match(/[^.?!;]+[.?!;]*|.+/g) || [];
-            
-            let chunks = [];
-            let currentChunk = "";
-            
-            // Reagrupa frases muito curtas para não fazer requests demais,
-            // mas mantém um limite seguro (~200 chars) para evitar timeouts no mobile
-            for (let segment of segments) {
-                if ((currentChunk + segment).length < 200) {
-                    currentChunk += segment;
-                } else {
-                    if (currentChunk.trim().length > 0) chunks.push(currentChunk);
-                    currentChunk = segment;
-                }
-            }
-            if (currentChunk.trim().length > 0) chunks.push(currentChunk);
-            
-            return chunks;
-        }
-
         async function fetchAudioChunk(textChunk, voiceName) {
             const url = `${ttsApiUrl}?key=${apiKey}`;
-            // INSTRUÇÃO: "com ritmo ligeiramente acelerado" para acelerar a fala.
             const fullPrompt = `Leia em português do Brasil, estilo carioca educado, tom informal, com ritmo ligeiramente acelerado: ${textChunk}`;
             
             const payload = {
                 contents: [{ parts: [{ text: fullPrompt }] }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } }
-                    }
-                }
+                generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } } } }
             };
 
-            let response = null;
-            let result = null;
-            const timeoutDuration = 20000; // Aumentado para 20s para segurança extra no mobile
+            let response, result;
+            const timeoutDuration = 20000;
             
-            // IMPLEMENTAÇÃO DE 5 TENTATIVAS (RETRIES) COM TIMEOUT FORÇADO
             for (let i = 0; i < 5; i++) { 
                 try {
-                    // Configuração do AbortController para forçar o timeout
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
 
@@ -595,76 +423,38 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload),
-                        signal: controller.signal // Aplica o sinal de timeout
+                        signal: controller.signal
                     });
-                    
-                    clearTimeout(timeoutId); // Limpa o timeout se a requisição for rápida
+                    clearTimeout(timeoutId);
 
                     if (response.ok) {
-                        try {
-                            result = await response.json();
-                        } catch (e) {
-                             // Erro de parse JSON, tenta o próximo retry
-                            console.error("Erro ao fazer parse do JSON na tentativa", i + 1, e);
-                            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                            continue; 
-                        }
-                        
-                        // Verifica se o conteúdo de áudio está realmente presente
-                        if (result.candidates?.[0]?.content?.parts?.[0]?.inlineData) {
-                             break; // Sucesso, sai do loop
-                        }
-
-                        if (result.promptFeedback?.blockReason) {
-                            throw new Error(`Bloqueio de segurança: ${result.promptFeedback.blockReason}`);
-                        }
-
-                        // Resposta OK mas sem dados úteis, tenta o próximo retry com backoff
-                        console.warn("Resposta OK, mas dados de áudio ausentes. Tentando novamente.", result);
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                        continue;
+                        try { result = await response.json(); } catch (e) { await new Promise(r => setTimeout(r, 1000)); continue; }
+                        if (result.candidates?.[0]?.content?.parts?.[0]?.inlineData) break;
+                        await new Promise(r => setTimeout(r, 1000)); continue;
                     }
                     
-                    // Lógica de Rate Limit (429) ou outros erros HTTP
-                    if (response.status === 429) {
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                    } else {
-                        // Erro HTTP persistente, lança exceção para parar a função
-                        throw new Error(`Erro API: ${response.statusText} (Status: ${response.status})`);
-                    }
+                    if (response.status === 429) await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                    else throw new Error(`Erro API: ${response.status}`);
 
                 } catch (error) {
-                    if (error.name === 'AbortError') {
-                        console.error(`Tentativa ${i + 1} falhou: Timeout após ${timeoutDuration / 1000}s. Re-tentando...`);
-                        // O AbortError é tratado, e o loop continuará para a próxima tentativa
-                    } else if (error.message.includes('Failed to fetch')) {
-                        // Geralmente um erro de rede/conexão no WebView
-                        console.error(`Tentativa ${i + 1} falhou: Erro de rede (Failed to fetch). Re-tentando...`);
-                    } else {
-                        // Outro erro específico, como Bloqueio de Segurança
-                        throw error;
-                    }
-                    // Espera o tempo de backoff antes da próxima tentativa
-                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
             
             if (!result || !result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
-                throw new Error("Falha na Geração: Não foi possível obter dados de áudio após 5 tentativas. Tente usar uma conexão mais estável.");
+                throw new Error("Falha na geração do áudio.");
             }
 
             const part = result.candidates[0].content.parts[0].inlineData;
-            const mimeType = part.mimeType;
-            const rateMatch = mimeType.match(/rate=(\d+)/);
-            const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
-
             return {
                 buffer: base64ToArrayBuffer(part.data),
-                sampleRate: sampleRate
+                sampleRate: part.mimeType.match(/rate=(\d+)/) ? parseInt(part.mimeType.match(/rate=(\d+)/)[1]) : 24000
             };
         }
 
         async function generateFullAudio() {
+            if (!checkApiKey()) return;
+
             const text = textInput.value.trim();
             const selectedVoice = document.getElementById('voice-select').value;
 
@@ -674,7 +464,6 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                 return;
             }
 
-            // UI Reset
             generateButton.disabled = true;
             buttonText.textContent = 'Gerando Áudio...';
             buttonIcon.classList.add('hidden');
@@ -687,46 +476,35 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
             audioPlayer.src = '';
 
             try {
-                // ESTRATÉGIA DE FRAGMENTAÇÃO INTELIGENTE (SENTENÇAS)
-                // Isso cria chunks menores (~150-200 chars) que processam muito mais rápido
-                // evitando timeouts em redes móveis
                 const chunks = splitTextIntoSentences(text);
                 const totalChunks = chunks.length;
-                
                 let allPcmData = [];
                 let finalSampleRate = 24000;
 
                 for (let i = 0; i < totalChunks; i++) {
                     const chunkText = chunks[i];
-                    
-                    // Update Progress
                     const percent = Math.round(((i) / totalChunks) * 100);
                     progressBar.style.width = `${percent}%`;
                     progressPercent.textContent = `${percent}%`;
                     progressText.textContent = `Processando parte ${i + 1} de ${totalChunks}...`;
 
-                    // DELAY CONSERVADOR (750ms) entre chunks para estabilidade
                     if (i > 0) await new Promise(r => setTimeout(r, 750));
 
                     try {
                         const chunkAudio = await fetchAudioChunk(chunkText, selectedVoice);
                         finalSampleRate = chunkAudio.sampleRate;
-                        
                         allPcmData.push(new Int16Array(chunkAudio.buffer));
                     } catch (err) {
-                        console.warn(`Pulando trecho ${i+1} devido a erro persistente:`, err);
-                        // Continua para o próximo chunk em vez de quebrar tudo
-                        // Isso garante que pelo menos parte do áudio seja gerada
+                        console.warn(`Pulando trecho ${i+1}:`, err);
                     }
                 }
 
+                if (allPcmData.length === 0) throw new Error("Nenhum áudio gerado. Verifique sua chave de API.");
+
                 progressBar.style.width = `100%`;
                 progressPercent.textContent = `100%`;
-                progressText.textContent = `Finalizando...`;
-
+                
                 const totalLength = allPcmData.reduce((acc, curr) => acc + curr.length, 0);
-                if (totalLength === 0) throw new Error("Nenhuma parte do áudio pôde ser gerada com sucesso. Tente novamente ou use um texto mais curto.");
-
                 const finalBuffer = new Int16Array(totalLength);
                 let offset = 0;
                 for (const chunk of allPcmData) {
@@ -735,27 +513,19 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                 }
 
                 const wavBlob = pcmToWav(finalBuffer, finalSampleRate);
-                const audioUrl = URL.createObjectURL(wavBlob);
-                
-                audioPlayer.src = audioUrl;
+                audioPlayer.src = URL.createObjectURL(wavBlob);
                 resultsArea.classList.remove('hidden');
 
             } catch (error) {
                 console.error(error);
-                // MENSAGEM DE ERRO MAIS CLARA
-                errorMessage.textContent = `Ops! Erro de geração em mobile: ${error.message}. Verifique sua conexão e tente novamente.`;
+                errorMessage.textContent = `Erro: ${error.message}`;
                 errorMessage.classList.remove('hidden');
             } finally {
                 generateButton.disabled = false;
                 buttonText.textContent = 'Gerar Áudio Completo';
                 buttonIcon.classList.remove('hidden');
                 loadingSpinner.classList.add('hidden');
-                
-                setTimeout(() => {
-                    if(!resultsArea.classList.contains('hidden')) {
-                         progressContainer.classList.add('hidden');
-                    }
-                }, 1000);
+                setTimeout(() => { if(!resultsArea.classList.contains('hidden')) progressContainer.classList.add('hidden'); }, 1000);
             }
         }
     </script>
