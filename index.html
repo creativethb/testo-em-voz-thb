@@ -105,9 +105,31 @@
             background-color: #ef4444 !important; /* Vermelho */
             border-color: #ef4444 !important;
         }
+
+        /* Toast de notificação */
+        #toast-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #22c55e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+        #toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8 flex items-center justify-center">
+
+    <!-- Toast de Notificação -->
+    <div id="toast-notification">Texto copiado!</div>
 
     <div class="w-full max-w-[32rem] glass-panel p-6 sm:p-8 md:p-10 rounded-3xl my-8 relative">
         
@@ -159,7 +181,7 @@
 
                 <div>
                     <label for="text-input" class="block text-xs font-bold uppercase tracking-wider mb-2 ml-1 p-dynamic">Seu Texto</label>
-                    <textarea id="text-input" rows="10" class="w-full p-6 border rounded-3xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-y transition-shadow text-base leading-relaxed shadow-lg shadow-slate-100 input-bg" placeholder="Digite ou cole o texto aqui...">E aí, galera! Eu sou o Thiago Castro!
+                    <textarea id="text-input" rows="10" class="w-full p-6 border rounded-3xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-y transition-shadow text-base leading-relaxed shadow-lg shadow-slate-100 input-bg placeholder-gray-400" placeholder="Digite ou cole o texto aqui..." onclick="autoPasteTranscription(this)">E aí, galera! Eu sou o Thiago Castro!
 Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar as variações de voz e gerar seus áudios.🚀</textarea>
                 </div>
 
@@ -292,8 +314,8 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                         <svg id="transcribe-loading-spinner" class="animate-spin h-5 w-5 text-white absolute inset-0 m-auto hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     </button>
 
-                    <label class="block text-xs font-bold uppercase tracking-wider ml-1 p-dynamic mt-4">Transcrição</label>
-                    <textarea id="transcription-result-text" rows="8" class="w-full p-6 border rounded-3xl resize-y shadow-lg input-bg" readonly placeholder="O texto do áudio aparecerá aqui..."></textarea>
+                    <label class="block text-xs font-bold uppercase tracking-wider ml-1 p-dynamic mt-4">Transcrição (Toque para copiar)</label>
+                    <textarea id="transcription-result-text" rows="8" class="w-full p-6 border rounded-3xl resize-y shadow-lg input-bg cursor-pointer hover:border-orange-400 transition-colors" readonly placeholder="O texto do áudio aparecerá aqui... Toque nele para copiar e usar no gerador." onclick="copyTranscriptionToClipboard(this)"></textarea>
                 </div>
             </div>
         </div>
@@ -316,6 +338,9 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
         const ttsApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent";
         const textApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
         
+        // GLOBAL VARIABLE FOR SMART PASTE
+        let pendingTranscription = "";
+
         // Validação simples
         function checkApiKey() {
             if (!PARTIAL_KEY || PARTIAL_KEY.length < 10) {
@@ -350,6 +375,16 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
 
             for (let i = 0; i < pcm16.length; i++) { view.setInt16(offset, pcm16[i], true); offset += 2; }
             return new Blob([view], { type: 'audio/wav' });
+        }
+
+        // --- UI NOTIFICATIONS (TOAST) ---
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         // --- TEMA E ABAS ---
@@ -544,6 +579,51 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
             }
         }
 
+        // --- SMART COPY / PASTE LOGIC ---
+        function copyTranscriptionToClipboard(element) {
+            if (!element.value) return;
+            
+            // 1. Copia para o Clipboard do sistema
+            navigator.clipboard.writeText(element.value).then(() => {
+                showToast("Texto copiado! Vá para a aba de áudio.");
+            }).catch(err => {
+                console.error('Erro ao copiar', err);
+                showToast("Erro ao copiar. Tente selecionar manualmente.");
+            });
+
+            // 2. Feedback visual no elemento
+            const originalBorder = element.style.borderColor;
+            element.style.borderColor = "#22c55e"; // Verde
+            element.classList.add('ring-2', 'ring-green-500');
+            
+            setTimeout(() => {
+                element.style.borderColor = originalBorder;
+                element.classList.remove('ring-2', 'ring-green-500');
+            }, 500);
+        }
+
+        function autoPasteTranscription(element) {
+            // Verifica se tem algo pendente na memória interna
+            if (pendingTranscription && pendingTranscription.length > 0) {
+                // Efeito visual antes de colar
+                element.style.transition = "background-color 0.2s";
+                element.style.backgroundColor = "#dcfce7"; // Verde claro
+                
+                // Cola o texto
+                element.value = pendingTranscription;
+                
+                // Feedback
+                showToast("Texto da transcrição colado!");
+                
+                // Limpa a variável para não colar de novo acidentalmente
+                pendingTranscription = "";
+                
+                setTimeout(() => {
+                    element.style.backgroundColor = ""; // Volta ao normal
+                }, 500);
+            }
+        }
+
         // --- TRANSCRIÇÃO (SPEECH-TO-TEXT) ---
         async function transcribeAudio() {
             if (!checkApiKey()) return;
@@ -614,6 +694,8 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                     const transcription = result.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (transcription) {
                         resultTextarea.value = transcription;
+                        // SALVA NA VARIÁVEL GLOBAL PARA O "SMART PASTE"
+                        pendingTranscription = transcription;
                     } else {
                         resultTextarea.value = "A IA não retornou texto. O áudio pode estar vazio ou inaudível.";
                     }
