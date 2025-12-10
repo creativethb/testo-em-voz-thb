@@ -328,11 +328,11 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
         // PASSO 1: Primeira parte da chave
         const KEY_PREFIX = "AIza"; 
         
-        // PASSO 2: Segunda parte da chave (EMBUTIDA CONFORME SOLICITADO)
+        // PASSO 2: Segunda parte da chave
         const PARTIAL_KEY = "SyAT3F1PV1JH5CKa1gK3roevlrW65qWdxto"; 
         
-        // O app reconstrói a chave automaticamente
-        const apiKey = KEY_PREFIX + PARTIAL_KEY;
+        // O app reconstrói a chave automaticamente (com trim para segurança)
+        const apiKey = (KEY_PREFIX + PARTIAL_KEY).trim();
         // -----------------------------------------------------------
 
         const ttsApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent";
@@ -609,10 +609,6 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                 console.error('Erro ao copiar', err);
                 showToast("Erro ao copiar. Tente selecionar manualmente.");
             }
-            
-            // Remove a seleção (opcional, mas bom para UX)
-            // window.getSelection().removeAllRanges(); 
-            // Comentado pois em mobile as vezes é bom manter selecionado se falhar
         }
 
         function autoPasteTranscription(element) {
@@ -783,6 +779,7 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
 
                 } catch (error) {
                     await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                    throw error; // Re-lança o erro para ser capturado no loop principal
                 }
             }
             
@@ -825,6 +822,7 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                 const totalChunks = chunks.length;
                 let allPcmData = [];
                 let finalSampleRate = 24000;
+                let lastError = null;
 
                 for (let i = 0; i < totalChunks; i++) {
                     const chunkText = chunks[i];
@@ -841,10 +839,17 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                         allPcmData.push(new Int16Array(chunkAudio.buffer));
                     } catch (err) {
                         console.warn(`Pulando trecho ${i+1}:`, err);
+                        lastError = err;
+                        // Se for erro de permissão ou requisição inválida, para tudo
+                        if (err.message.includes("400") || err.message.includes("403")) {
+                            break; 
+                        }
                     }
                 }
 
-                if (allPcmData.length === 0) throw new Error("Nenhum áudio gerado. Verifique sua chave de API.");
+                if (allPcmData.length === 0) {
+                     throw new Error(lastError ? lastError.message : "Nenhum áudio gerado. Verifique a chave de API.");
+                }
 
                 progressBar.style.width = `100%`;
                 progressPercent.textContent = `100%`;
