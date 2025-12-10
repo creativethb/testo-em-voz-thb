@@ -93,6 +93,18 @@
             0% { background-position: -400px 0; }
             100% { background-position: 400px 0; }
         }
+
+        /* Animação de pulso vermelho para gravação */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .recording-pulse {
+            animation: pulse-red 1.5s infinite;
+            background-color: #ef4444 !important; /* Vermelho */
+            border-color: #ef4444 !important;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8 flex items-center justify-center">
@@ -115,12 +127,13 @@
             </div>
             <h1 class="text-4xl sm:text-5xl font-extrabold h1-dynamic tracking-tight">Gerador de Áudio</h1>
             <p class="font-extrabold text-xl mt-2 p-subtitle">Thiago Castro</p>
-            <p class="mt-4 p-dynamic max-w-md mx-auto text-base leading-relaxed">Transforme seus textos em áudio com voz natural. Otimizado para Mobile.</p>
+            <p class="mt-4 p-dynamic max-w-md mx-auto text-base leading-relaxed">Ferramenta completa: Texto para Voz, Tradução e Transcrição.</p>
         </div>
 
         <div class="flex p-1 rounded-xl shadow-inner mb-8" style="background-color: var(--input-bg);">
-            <button class="flex-1 py-3 px-2 rounded-xl text-sm font-bold tab-button active" onclick="showTab('tts', this)">Texto p/ Áudio</button>
-            <button class="flex-1 py-3 px-2 rounded-xl text-sm font-bold tab-button" onclick="showTab('translate', this)">Tradução</button>
+            <button class="flex-1 py-3 px-1 rounded-xl text-xs sm:text-sm font-bold tab-button active" onclick="showTab('tts', this)">Texto p/ Áudio</button>
+            <button class="flex-1 py-3 px-1 rounded-xl text-xs sm:text-sm font-bold tab-button" onclick="showTab('translate', this)">Tradução</button>
+            <button class="flex-1 py-3 px-1 rounded-xl text-xs sm:text-sm font-bold tab-button" onclick="showTab('transcribe', this)">Transcrever</button>
         </div>
 
         <div id="tab-content" class="space-y-8">
@@ -225,6 +238,64 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                     <textarea id="translation-result-text" rows="6" class="w-full p-6 border rounded-3xl resize-y shadow-lg input-bg" readonly placeholder="A tradução aparecerá aqui."></textarea>
                 </div>
             </div>
+
+            <!-- Transcription Tab (ATUALIZADA) -->
+            <div id="transcribe" class="tab-pane hidden">
+                <div class="space-y-4">
+                    <p class="p-dynamic text-sm mb-2">Grave um áudio ou faça upload para converter em texto.</p>
+                    
+                    <!-- Botão de Microfone -->
+                    <div class="flex flex-col items-center justify-center mb-6">
+                        <button id="record-button" onclick="toggleRecording()" class="w-20 h-20 rounded-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-all duration-300 shadow-lg group relative">
+                            <!-- Ícone Microfone (Normal) -->
+                            <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                            <!-- Ícone Stop (Gravando) -->
+                            <svg id="stop-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                            </svg>
+                        </button>
+                        <span id="recording-status" class="text-xs font-bold mt-2 p-dynamic uppercase tracking-wider">Toque para Gravar</span>
+                        
+                        <!-- Preview do Áudio Gravado -->
+                        <div id="recorded-audio-container" class="hidden mt-4 w-full">
+                            <audio id="recorded-audio-preview" controls class="w-full accent-orange-500"></audio>
+                            <p class="text-center text-xs text-green-600 font-bold mt-1">Áudio gravado com sucesso!</p>
+                        </div>
+                    </div>
+
+                    <!-- Divisor -->
+                    <div class="flex items-center justify-center my-4">
+                        <div class="border-t border-gray-300 dark:border-gray-600 w-full"></div>
+                        <span class="px-3 text-xs font-bold text-gray-400 uppercase">OU</span>
+                        <div class="border-t border-gray-300 dark:border-gray-600 w-full"></div>
+                    </div>
+                    
+                    <!-- File Input estilizado -->
+                    <div class="flex items-center justify-center w-full">
+                        <label for="audio-file-input" class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-300 hover:border-orange-500 transition-colors input-bg">
+                            <div class="flex flex-col items-center justify-center pt-2">
+                                <svg class="w-6 h-6 mb-2 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                </svg>
+                                <p class="text-xs text-gray-500 dark:text-gray-400"><span class="font-semibold">Upload de arquivo</span> (MP3, WAV)</p>
+                            </div>
+                            <input id="audio-file-input" type="file" class="hidden" accept="audio/*" />
+                        </label>
+                    </div>
+                    <div id="file-name-display" class="text-xs font-bold text-center p-subtitle hidden"></div>
+
+                    <button id="transcribe-button" class="w-full group relative bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 px-6 rounded-2xl shadow-xl shadow-orange-400/50 transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed" onclick="transcribeAudio()">
+                        <span id="transcribe-button-text" class="relative z-10 flex items-center justify-center gap-2">Transcrever Áudio</span>
+                        <svg id="transcribe-loading-spinner" class="animate-spin h-5 w-5 text-white absolute inset-0 m-auto hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+
+                    <label class="block text-xs font-bold uppercase tracking-wider ml-1 p-dynamic mt-4">Transcrição</label>
+                    <textarea id="transcription-result-text" rows="8" class="w-full p-6 border rounded-3xl resize-y shadow-lg input-bg" readonly placeholder="O texto do áudio aparecerá aqui..."></textarea>
+                </div>
+            </div>
         </div>
 
         <div id="error-message" class="hidden mt-6 bg-red-100 border border-red-300 text-red-700 p-4 rounded-xl text-sm font-medium animate-[shake_0.5s_ease-in-out] shadow-md"></div>
@@ -232,12 +303,11 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
 
     <script>
         // ---------------- CONFIGURAÇÃO DE SEGURANÇA ----------------
-        // PASSO 1: Mantenha as 3 primeiras letras (Padrão Google é "AIz")
-        const KEY_PREFIX = "AIz"; 
+        // PASSO 1: Primeira parte da chave
+        const KEY_PREFIX = "AIza"; 
         
-        // PASSO 2: COLE AQUI O RESTANTE DA CHAVE (Sem as 3 primeiras letras)
-        // A chave fornecida pelo usuário foi inserida aqui:
-        const PARTIAL_KEY = "-lang-client-0485496897"; 
+        // PASSO 2: Segunda parte da chave (EMBUTIDA CONFORME SOLICITADO)
+        const PARTIAL_KEY = "SyAT3F1PV1JH5CKa1gK3roevlrW65qWdxto"; 
         
         // O app reconstrói a chave automaticamente
         const apiKey = KEY_PREFIX + PARTIAL_KEY;
@@ -249,7 +319,7 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
         // Validação simples
         function checkApiKey() {
             if (!PARTIAL_KEY || PARTIAL_KEY.length < 10) {
-                alert("ERRO DE CONFIGURAÇÃO:\n\nVocê precisa abrir o arquivo 'index.html' e colar sua Chave de API na variável PARTIAL_KEY.");
+                alert("ERRO DE CONFIGURAÇÃO: Chave de API inválida.");
                 return false;
             }
             return true;
@@ -309,6 +379,25 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
             const savedTheme = localStorage.getItem('theme') || 'light';
             applyTheme(savedTheme);
             showTab('tts', document.querySelector('.tab-button'));
+            
+            // Listener para mostrar nome do arquivo selecionado
+            const fileInput = document.getElementById('audio-file-input');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const recordedAudioContainer = document.getElementById('recorded-audio-container');
+            const recordedAudioPreview = document.getElementById('recorded-audio-preview');
+
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    fileNameDisplay.textContent = `Arquivo selecionado: ${this.files[0].name}`;
+                    fileNameDisplay.classList.remove('hidden');
+                    // Limpa o áudio gravado se houver, para evitar confusão
+                    recordedAudioBlob = null;
+                    recordedAudioContainer.classList.add('hidden');
+                    recordedAudioPreview.src = '';
+                } else {
+                    fileNameDisplay.classList.add('hidden');
+                }
+            });
         });
         
         function showTab(tabId, clickedButton) {
@@ -386,6 +475,167 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                 translateButtonText.classList.remove('hidden');
                 translateLoadingSpinner.classList.add('hidden');
             }
+        }
+
+        // --- GRAVAÇÃO DE ÁUDIO (MICROFONE) ---
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedAudioBlob = null;
+        let isRecording = false;
+
+        async function toggleRecording() {
+            const recordButton = document.getElementById('record-button');
+            const micIcon = document.getElementById('mic-icon');
+            const stopIcon = document.getElementById('stop-icon');
+            const recordingStatus = document.getElementById('recording-status');
+            const recordedAudioContainer = document.getElementById('recorded-audio-container');
+            const recordedAudioPreview = document.getElementById('recorded-audio-preview');
+            const fileInput = document.getElementById('audio-file-input');
+            const fileNameDisplay = document.getElementById('file-name-display');
+
+            if (!isRecording) {
+                // INICIAR GRAVAÇÃO
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        recordedAudioBlob = new Blob(audioChunks, { type: 'audio/mp3' }); // Ou 'audio/wav' dependendo do suporte
+                        const audioUrl = URL.createObjectURL(recordedAudioBlob);
+                        recordedAudioPreview.src = audioUrl;
+                        recordedAudioContainer.classList.remove('hidden');
+                        
+                        // Limpa qualquer arquivo selecionado via upload
+                        fileInput.value = '';
+                        fileNameDisplay.classList.add('hidden');
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    // UI Updates
+                    recordButton.classList.add('recording-pulse');
+                    micIcon.classList.add('hidden');
+                    stopIcon.classList.remove('hidden');
+                    recordingStatus.textContent = "Gravando... Toque para Parar";
+                    recordingStatus.classList.add('text-red-500');
+                    recordedAudioContainer.classList.add('hidden'); // Esconde preview antigo
+
+                } catch (error) {
+                    alert("Erro ao acessar microfone: " + error.message + ". Verifique as permissões do navegador.");
+                    console.error(error);
+                }
+            } else {
+                // PARAR GRAVAÇÃO
+                mediaRecorder.stop();
+                isRecording = false;
+
+                // UI Updates
+                recordButton.classList.remove('recording-pulse');
+                micIcon.classList.remove('hidden');
+                stopIcon.classList.add('hidden');
+                recordingStatus.textContent = "Toque para Gravar";
+                recordingStatus.classList.remove('text-red-500');
+            }
+        }
+
+        // --- TRANSCRIÇÃO (SPEECH-TO-TEXT) ---
+        async function transcribeAudio() {
+            if (!checkApiKey()) return;
+
+            const fileInput = document.getElementById('audio-file-input');
+            const resultTextarea = document.getElementById('transcription-result-text');
+            const transcribeButton = document.getElementById('transcribe-button');
+            const transcribeButtonText = document.getElementById('transcribe-button-text');
+            const transcribeLoadingSpinner = document.getElementById('transcribe-loading-spinner');
+
+            let blobToSend = null;
+            let mimeType = "audio/mp3"; // Padrão
+
+            // Verifica se tem arquivo de upload ou gravação
+            if (fileInput.files && fileInput.files[0]) {
+                blobToSend = fileInput.files[0];
+                mimeType = blobToSend.type || "audio/mp3";
+            } else if (recordedAudioBlob) {
+                blobToSend = recordedAudioBlob;
+                // Blob do MediaRecorder muitas vezes não tem type definido corretamente no Android, forçamos um compatível
+                mimeType = "audio/mp3"; 
+            } else {
+                alert("Por favor, grave um áudio ou selecione um arquivo primeiro.");
+                return;
+            }
+
+            if (blobToSend.size > 20 * 1024 * 1024) { 
+                alert("O áudio é muito grande. Limite de 20MB.");
+                return;
+            }
+
+            transcribeButton.disabled = true;
+            transcribeButtonText.classList.add('hidden');
+            transcribeLoadingSpinner.classList.remove('hidden');
+            resultTextarea.value = "Enviando áudio para a IA (isso pode levar alguns segundos)...";
+
+            // Converter Blob para Base64
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                // Pega apenas a parte base64 da string dataURL
+                const base64Data = e.target.result.split(',')[1];
+
+                const payload = {
+                    contents: [{
+                        parts: [
+                            { text: "Transcreva o áudio a seguir fielmente." },
+                            { inlineData: { mimeType: mimeType, data: base64Data } }
+                        ]
+                    }]
+                };
+
+                try {
+                    let response, result;
+                    for (let i = 0; i < 3; i++) {
+                        response = await fetch(`${textApiUrl}?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (response.ok) { result = await response.json(); break; }
+                        if (response.status === 429) await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                        else throw new Error(`Erro API: ${response.status} - ${response.statusText}`);
+                    }
+
+                    if (!result) throw new Error("Falha na conexão com a API.");
+                    
+                    const transcription = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (transcription) {
+                        resultTextarea.value = transcription;
+                    } else {
+                        resultTextarea.value = "A IA não retornou texto. O áudio pode estar vazio ou inaudível.";
+                    }
+
+                } catch (error) {
+                    console.error("Erro na transcrição:", error);
+                    resultTextarea.value = `Erro: ${error.message}.`;
+                } finally {
+                    transcribeButton.disabled = false;
+                    transcribeButtonText.classList.remove('hidden');
+                    transcribeLoadingSpinner.classList.add('hidden');
+                }
+            };
+            
+            reader.onerror = function() {
+                resultTextarea.value = "Erro ao processar o arquivo de áudio.";
+                transcribeButton.disabled = false;
+                transcribeButtonText.classList.remove('hidden');
+                transcribeLoadingSpinner.classList.add('hidden');
+            };
+
+            reader.readAsDataURL(blobToSend);
         }
 
         // --- TTS (ÁUDIO) ---
