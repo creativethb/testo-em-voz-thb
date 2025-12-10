@@ -582,24 +582,37 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
         // --- SMART COPY / PASTE LOGIC ---
         function copyTranscriptionToClipboard(element) {
             if (!element.value) return;
-            
-            // 1. Copia para o Clipboard do sistema
-            navigator.clipboard.writeText(element.value).then(() => {
-                showToast("Texto copiado! Vá para a aba de áudio.");
-            }).catch(err => {
+
+            // Seleciona o conteúdo do campo
+            element.select();
+            element.setSelectionRange(0, 99999); // Para dispositivos móveis
+
+            try {
+                // Tenta copiar usando o comando antigo (mais compatível com iFrames)
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("Texto copiado! Vá para a aba de áudio.");
+                    
+                    // Feedback visual
+                    const originalBorder = element.style.borderColor;
+                    element.style.borderColor = "#22c55e"; // Verde
+                    element.classList.add('ring-2', 'ring-green-500');
+                    
+                    setTimeout(() => {
+                        element.style.borderColor = originalBorder;
+                        element.classList.remove('ring-2', 'ring-green-500');
+                    }, 500);
+                } else {
+                    throw new Error("Comando de cópia falhou");
+                }
+            } catch (err) {
                 console.error('Erro ao copiar', err);
                 showToast("Erro ao copiar. Tente selecionar manualmente.");
-            });
-
-            // 2. Feedback visual no elemento
-            const originalBorder = element.style.borderColor;
-            element.style.borderColor = "#22c55e"; // Verde
-            element.classList.add('ring-2', 'ring-green-500');
+            }
             
-            setTimeout(() => {
-                element.style.borderColor = originalBorder;
-                element.classList.remove('ring-2', 'ring-green-500');
-            }, 500);
+            // Remove a seleção (opcional, mas bom para UX)
+            // window.getSelection().removeAllRanges(); 
+            // Comentado pois em mobile as vezes é bom manter selecionado se falhar
         }
 
         function autoPasteTranscription(element) {
