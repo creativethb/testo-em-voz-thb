@@ -749,7 +749,13 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
             
             const payload = {
                 contents: [{ parts: [{ text: fullPrompt }] }],
-                generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } } } }
+                generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } } } },
+                safetySettings: [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                ]
             };
 
             let response, result;
@@ -770,6 +776,12 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
 
                     if (response.ok) {
                         try { result = await response.json(); } catch (e) { await new Promise(r => setTimeout(r, 1000)); continue; }
+                        
+                        // Check for safety block or empty data
+                        if (result.promptFeedback?.blockReason) {
+                             throw new Error(`Bloqueio de segurança: ${result.promptFeedback.blockReason}`);
+                        }
+                        
                         if (result.candidates?.[0]?.content?.parts?.[0]?.inlineData) break;
                         await new Promise(r => setTimeout(r, 1000)); continue;
                     }
@@ -778,13 +790,19 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                     else throw new Error(`Erro API: ${response.status}`);
 
                 } catch (error) {
+                    // Don't retry immediately on fatal errors
+                    if (error.message.includes("Bloqueio")) throw error;
                     await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
-                    throw error; // Re-lança o erro para ser capturado no loop principal
+                    if (i === 4) throw error; // Re-throw on last attempt
                 }
             }
             
             if (!result || !result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
-                throw new Error("Falha na geração do áudio.");
+                 // Try to provide a more specific error if available
+                 if (result && result.promptFeedback) {
+                     throw new Error(`Falha na geração: Feedback de segurança (${JSON.stringify(result.promptFeedback)})`);
+                 }
+                throw new Error("Falha na geração do áudio. Resposta vazia da API.");
             }
 
             const part = result.candidates[0].content.parts[0].inlineData;
@@ -841,7 +859,7 @@ Essa é a minha voz padrão, com sotaque carioca. Use este espaço para testar a
                         console.warn(`Pulando trecho ${i+1}:`, err);
                         lastError = err;
                         // Se for erro de permissão ou requisição inválida, para tudo
-                        if (err.message.includes("400") || err.message.includes("403")) {
+                        if (err.message.includes("400") || err.message.includes("403") || err.message.includes("Bloqueio")) {
                             break; 
                         }
                     }
